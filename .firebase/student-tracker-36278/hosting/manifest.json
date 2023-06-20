@@ -1,0 +1,35 @@
+{
+    "name": "student_tracker",
+    "short_name": "student_tracker",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#D3D3D3",
+    "theme_color": "#4169E1",
+    "description": "An application which permits parents to track the progress of their kids in school",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}
