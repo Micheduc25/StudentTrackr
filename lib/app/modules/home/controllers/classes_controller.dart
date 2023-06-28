@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -5,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:student_tracker/app/controllers/school_controller.dart';
 import 'package:student_tracker/app/models/base_model.dart';
 import 'package:student_tracker/app/models/class_model.dart';
+import 'package:student_tracker/app/modules/home/controllers/students_controller.dart';
+import 'package:student_tracker/app/modules/home/controllers/subjects_controller.dart';
 
 class ClassesController extends GetxController {
   RxList<ClassModel> classes = <ClassModel>[].obs;
@@ -46,7 +49,12 @@ class ClassesController extends GetxController {
 
               newClass = await newClass.create();
 
-              classes.insert(0, newClass);
+              classes.add(newClass);
+
+              if (classes.length == 1) {
+                SubjectsController.to.currentClass.value = classes[0];
+                StudentsController.to.currentClass.value = classes[0];
+              }
 
               nameController.clear();
             } on Exception catch (e) {
@@ -113,11 +121,51 @@ class ClassesController extends GetxController {
 
             if (classToDelete == null) return;
 
+            //delete all subjects related to the class
+            final subjectsToDelete = await FirebaseFirestore.instance
+                .collection("subjects")
+                .where("class", isEqualTo: classToDelete.ref)
+                .get();
+
+            for (final subject in subjectsToDelete.docs) {
+              //delete marks for the subject
+              final marksToDelete = await FirebaseFirestore.instance
+                  .collection("marks")
+                  .where("subject", isEqualTo: subject.reference)
+                  .get();
+
+              for (final mark in marksToDelete.docs) {
+                await mark.reference.delete();
+              }
+
+              await subject.reference.delete();
+            }
+
+            //delete all students related to the class
+            final studentsToDelete = await FirebaseFirestore.instance
+                .collection("students")
+                .where("class", isEqualTo: classToDelete.ref)
+                .get();
+
+            for (final student in studentsToDelete.docs) {
+              await student.reference.delete();
+            }
+
             await classToDelete.delete();
 
             classes.removeWhere((cls) => cls.id == classToDelete.id);
+
+            if (classes.isEmpty) {
+              SubjectsController.to.fetchSubjectsList();
+              StudentsController.to.fetchClassStudentsList();
+            }
+
+            notifyChildrens();
+
+            Fluttertoast.showToast(msg: "Class deleted successfully");
           } on Exception catch (e) {
-            Fluttertoast.showToast(msg: "Failed to delete class");
+            Fluttertoast.showToast(
+                msg: "Failed to delete class", webBgColor: "#ff0000");
           }
         },
         loadingWidget: SpinKitDualRing(color: Get.theme.colorScheme.onPrimary));

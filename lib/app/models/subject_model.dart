@@ -1,18 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:student_tracker/app/models/class_model.dart';
-import 'package:student_tracker/app/models/student_model.dart';
 
 import 'base_model.dart';
 
 class SubjectModel extends BaseModel<SubjectModel> {
   String name;
   ClassModel subjectclass;
+  int coefficient;
   SubjectModel(
       {required String id,
       required DateTime created,
       required DateTime updated,
       required this.subjectclass,
-      required this.name})
+      required this.name,
+      this.coefficient = 1})
       : super(id: id, created: created, updated: updated) {
     collection = "subjects";
   }
@@ -24,7 +25,12 @@ class SubjectModel extends BaseModel<SubjectModel> {
 
   @override
   Map<String, dynamic> toMap() {
-    return {...super.toMap(), 'name': name, 'class': subjectclass.ref};
+    return {
+      ...super.toMap(),
+      'name': name,
+      'coefficient': coefficient,
+      'class': subjectclass.ref
+    };
   }
 
   static Future<SubjectModel> fromJson(Map<String, dynamic> json) async {
@@ -32,6 +38,7 @@ class SubjectModel extends BaseModel<SubjectModel> {
       id: json["id"],
       created: DateTime.parse(json['created']),
       updated: DateTime.parse(json['updated']),
+      coefficient: json['coefficient'] ?? 1,
       subjectclass: await ClassModel.fromJson(
           (await (json['class'] as DocumentReference<Map<String, dynamic>>)
                   .get())

@@ -71,34 +71,39 @@ class ChildrenMarksPage extends GetView<ChildrenMarksController> {
                       flex: 1,
                       child: Text(
                         "SN",
-                        style: Get.textTheme.titleSmall,
+                        style: Get.textTheme.bodyMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
-                        flex: 7,
+                        flex: Get.width < 600 ? 5 : 7,
                         child: Text(
-                          "Subject Name",
-                          style: Get.textTheme.titleSmall,
+                          "Subject",
+                          style: Get.textTheme.bodyMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
                         )),
                     Expanded(
                         flex: 2,
                         child: Text(
                           "Mark",
-                          style: Get.textTheme.titleSmall,
+                          style: Get.textTheme.bodyMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
                         )),
                     Expanded(
                         flex: 2,
                         child: Text(
                           "Total",
                           textAlign: TextAlign.center,
-                          style: Get.textTheme.titleSmall,
+                          style: Get.textTheme.bodyMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
                         )),
                     Expanded(
                         flex: 1,
                         child: Text(
-                          "Remark",
+                          Get.width <= 600 ? "Rm" : "Remark",
                           textAlign: TextAlign.center,
-                          style: Get.textTheme.titleSmall,
+                          style: Get.textTheme.bodyMedium!
+                              .copyWith(fontWeight: FontWeight.bold),
                         ))
                   ],
                 ),
@@ -148,7 +153,7 @@ class ChildrenMarksPage extends GetView<ChildrenMarksController> {
                                         child: Text("${index + 1}"),
                                       ),
                                       Expanded(
-                                          flex: 7,
+                                          flex: Get.width < 600 ? 5 : 7,
                                           child: Text(mark.subject.name)),
                                       Expanded(
                                           flex: 2,
@@ -205,23 +210,32 @@ class ChildrenMarksPage extends GetView<ChildrenMarksController> {
                           controller.childrenMarksMap[
                                   controller.currentChild.value!.id] !=
                               null
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                              Text(
-                                  "Total Marks Obtained: ${controller.getStudentTotalMarkObtained()}",
-                                  style: Get.textTheme.titleSmall),
-                              Text(
-                                  "Total Subject Marks: ${controller.getStudentTotalSubjectsMarks()}",
-                                  style: Get.textTheme.titleSmall),
-                              if (controller
-                                  .childrenMarksMap[
-                                      controller.currentChild.value!.id]!
-                                  .isNotEmpty)
+                      ? SizedBox(
+                          height: 30,
+                          child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              children: [
                                 Text(
-                                    "Average: ${controller.getAverage().toStringAsFixed(2)}/20",
-                                    style: Get.textTheme.titleSmall),
-                            ])
+                                    "Total Marks Obtained: ${controller.getStudentTotalMarkObtained()}",
+                                    style: Get.textTheme.bodySmall!
+                                        .copyWith(fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 15),
+                                Text(
+                                    "Total Subject Marks: ${controller.getStudentTotalSubjectsMarks()}",
+                                    style: Get.textTheme.bodySmall!
+                                        .copyWith(fontWeight: FontWeight.bold)),
+                                const SizedBox(width: 15),
+                                if (controller
+                                    .childrenMarksMap[
+                                        controller.currentChild.value!.id]!
+                                    .isNotEmpty)
+                                  Text(
+                                      "Average: ${controller.getAverage().toStringAsFixed(2)}/20",
+                                      style: Get.textTheme.bodySmall!.copyWith(
+                                          fontWeight: FontWeight.bold)),
+                              ]),
+                        )
                       : const SizedBox(
                           width: double.maxFinite,
                         )),

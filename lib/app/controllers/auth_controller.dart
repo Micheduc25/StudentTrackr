@@ -10,7 +10,9 @@ import 'package:student_tracker/app/models/class_model.dart';
 import 'package:student_tracker/app/models/school_model.dart';
 import 'package:student_tracker/app/models/user_model.dart';
 import 'package:student_tracker/app/modules/home/controllers/classes_controller.dart';
+import 'package:student_tracker/app/modules/home/controllers/home_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/marks_controller.dart';
+import 'package:student_tracker/app/modules/home/controllers/profile_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/students_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/subjects_controller.dart';
 import 'package:student_tracker/app/routes/app_pages.dart';
@@ -62,6 +64,7 @@ class AuthController extends GetxService {
       } else {
         await appStartRoutine();
         isAppStartRootineDone = true;
+        HomeController.to.isLoading.value = false;
       }
     });
   }
@@ -72,6 +75,10 @@ class AuthController extends GetxService {
       if (!_auth.currentUser!.emailVerified) {
         Get.rootDelegate.offNamed(Routes.VERIFY_EMAIL);
         return;
+      }
+
+      if (!Get.isRegistered<HomeController>()) {
+        Get.put(HomeController());
       }
 
       if (currentUser.value!.role != Config.Parent) {
@@ -99,9 +106,21 @@ class AuthController extends GetxService {
           studentsController.currentClass.value = classesController.classes[0];
           subjectsController.currentClass.value = classesController.classes[0];
         }
+
+        if (!Get.isRegistered<MarksController>()) {
+          Get.put(MarksController());
+        }
       }
 
-      Get.rootDelegate.offNamed(Routes.HOME);
+      if (!Get.isRegistered<ProfileController>()) {
+        Get.put(ProfileController());
+      }
+
+      print(Get.parameters);
+      Get.rootDelegate.offNamed(Routes.HOME,
+          parameters: Get.parameters.containsKey("location")
+              ? {"location": Get.parameters["location"] ?? ""}
+              : null);
     } else {
       Fluttertoast.showToast(
           msg: "An error occured while fetching the current user");

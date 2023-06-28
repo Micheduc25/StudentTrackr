@@ -12,13 +12,7 @@ class AppNavigationRail extends StatefulWidget {
 }
 
 class _AppNavigationRailState extends State<AppNavigationRail> {
-  List<String> navItems = [
-    "Home",
-    "Students Profile",
-    "Results",
-    "Attendance",
-    "Profile"
-  ];
+  List<String> navItems = ["Home", "Students Profile", "Results", "Profile"];
   int _selectedIndex = 0;
   void _onItemTapped(int index) {
     setState(() {

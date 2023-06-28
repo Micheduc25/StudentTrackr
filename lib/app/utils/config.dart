@@ -13,4 +13,5 @@ class Config {
 
   static const String Parent = "Parent";
   static const String markTotal = "markTotal";
+  static const String currentThemeMode = "currentThemeMode";
 }

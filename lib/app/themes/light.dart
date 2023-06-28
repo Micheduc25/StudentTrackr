@@ -63,6 +63,8 @@ ThemeData lightTheme = ThemeData(
         color: Colors.black, // Use royal blue for text field label color
       ),
     ),
+    cardColor: Colors.white,
+    cardTheme: const CardTheme(color: Colors.white),
     dropdownMenuTheme: const DropdownMenuThemeData(
         menuStyle: MenuStyle(),
         inputDecorationTheme:

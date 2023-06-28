@@ -14,7 +14,7 @@ import 'package:student_tracker/app/modules/home/controllers/subjects_controller
 
 import 'students_controller.dart';
 
-class MarksController extends GetxController {
+class MarksController extends GetxService {
   late RxList<int> yearsList;
   RxList<int> sequencesList = RxList([1, 2, 3]);
 
@@ -53,7 +53,10 @@ class MarksController extends GetxController {
         : null);
 
     //set default subject value
-    selectedSubject = Rx(subjectsController.getCurrentSubjects?[0]);
+    selectedSubject = Rx(subjectsController.getCurrentSubjects != null &&
+            subjectsController.getCurrentSubjects!.isNotEmpty
+        ? subjectsController.getCurrentSubjects![0]
+        : null);
 
     //set default year
     selectedYear = yearsList.first.obs;

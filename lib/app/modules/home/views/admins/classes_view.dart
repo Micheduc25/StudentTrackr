@@ -35,7 +35,7 @@ class _ClassesPageState extends State<ClassesPage> {
             ),
             actions: [
               SizedBox(
-                width: 250,
+                width: Get.width < 600 ? double.maxFinite : 250,
                 child: ElevatedButton(
                   onPressed: () {
                     classesController.editClass(id);
@@ -44,16 +44,17 @@ class _ClassesPageState extends State<ClassesPage> {
                   child: const Text('Save'),
                 ),
               ),
-              SizedBox(
-                width: 250,
-                child: ElevatedButton(
-                  onPressed: () {
-                    classesController.nameController.clear();
-                    Get.back();
-                  },
-                  child: const Text('Cancel'),
+              if (Get.width > 600)
+                SizedBox(
+                  width: Get.width < 600 ? double.maxFinite : 250,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      classesController.nameController.clear();
+                      Get.back();
+                    },
+                    child: const Text('Cancel'),
+                  ),
                 ),
-              ),
             ],
           ),
         );
@@ -162,7 +163,7 @@ class _ClassesPageState extends State<ClassesPage> {
                   ),
                   actions: [
                     SizedBox(
-                      width: 250,
+                      width: Get.width < 600 ? double.maxFinite : 250,
                       child: ElevatedButton(
                         onPressed: () async {
                           classesController.addClass();
@@ -171,8 +172,9 @@ class _ClassesPageState extends State<ClassesPage> {
                         child: const Text('Add'),
                       ),
                     ),
+                    if(Get.width>600)
                     SizedBox(
-                      width: 250,
+                      width: Get.width < 600 ? double.maxFinite : 250,
                       child: ElevatedButton(
                         onPressed: () {
                           classesController.nameController.clear();

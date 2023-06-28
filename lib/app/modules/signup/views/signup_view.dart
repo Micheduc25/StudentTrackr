@@ -14,7 +14,7 @@ class SignupView extends GetView<SignupController> {
     return Scaffold(
       body: Center(
         child: SizedBox(
-          width: Get.width * 0.5,
+          width: Get.width < 600 ? double.maxFinite : Get.width * 0.5,
           child: Card(
             elevation: 4,
             child: Padding(

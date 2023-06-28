@@ -39,7 +39,7 @@ class SubjectsPage extends GetView<SubjectsController> {
               ),
             ),
             Obx(() => controller.currentClass.value == null
-                ? const SizedBox()
+                ? const SizedBox.shrink()
                 : DropdownButton<String>(
                     value: controller.currentClass.value!.id,
                     onChanged: (String? id) {
@@ -62,7 +62,7 @@ class SubjectsPage extends GetView<SubjectsController> {
                 : const SizedBox.shrink()),
             const SizedBox(height: 24),
             Obx(() => controller.currentClass.value == null ||
-                    controller.getCurrentSubjects == null
+                    controller.classesController.classes.isEmpty
                 ? const SizedBox(
                     width: double.maxFinite,
                     child: Column(
@@ -70,93 +70,119 @@ class SubjectsPage extends GetView<SubjectsController> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(
-                          FontAwesomeIcons.book,
+                          FontAwesomeIcons.school,
                           size: 56,
                         ),
                         SizedBox(height: 15),
-                        Text("There are no subjects for now")
+                        Text(
+                          "To be able to create a subject, start by adding a class to your school on the classes tab",
+                          textAlign: TextAlign.center,
+                        )
                       ],
                     ),
                   )
-                : controller.isLoading.value
-                    ? Center(
-                        child: SpinKitDualRing(
-                            color: Get.theme.colorScheme.primary),
+                : controller.getCurrentSubjects == null
+                    ? const SizedBox(
+                        width: double.maxFinite,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              FontAwesomeIcons.book,
+                              size: 56,
+                            ),
+                            SizedBox(height: 15),
+                            Text("There are no subjects for now")
+                          ],
+                        ),
                       )
-                    : Expanded(
-                        child: GetBuilder<SubjectsController>(
-                          id: "subjects_list",
-                          builder: (controller) {
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              physics: const ClampingScrollPhysics(),
-                              itemCount: controller.getCurrentSubjects!.length,
-                              itemBuilder: (context, subjectIndexx) {
-                                final subject = controller
-                                    .getCurrentSubjects![subjectIndexx];
-                                return SubjectCard(
-                                  subject: subject,
-                                  onRemove: (s) =>
-                                      controller.deleteSubject(subject),
-                                  onEdit: (s) =>
-                                      controller.editSubject(subject),
+                    : controller.isLoading.value
+                        ? Center(
+                            child: SpinKitDualRing(
+                                color: Get.theme.colorScheme.primary),
+                          )
+                        : Expanded(
+                            child: GetBuilder<SubjectsController>(
+                              id: "subjects_list",
+                              builder: (controller) {
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: const ClampingScrollPhysics(),
+                                  itemCount:
+                                      controller.getCurrentSubjects!.length,
+                                  itemBuilder: (context, subjectIndexx) {
+                                    final subject = controller
+                                        .getCurrentSubjects![subjectIndexx];
+                                    return SubjectCard(
+                                      subject: subject,
+                                      onRemove: (s) =>
+                                          controller.deleteSubject(subject),
+                                      onEdit: (s) =>
+                                          controller.editSubject(subject),
+                                    );
+                                  },
                                 );
                               },
-                            );
-                          },
-                        ),
-                      )),
+                            ),
+                          )),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SizedBox(
-                width: Get.width * 0.4,
-                child: AlertDialog(
-                  title: const Text('Add a Subject'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: controller.nameController,
-                        decoration: const InputDecoration(labelText: 'Name'),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    SizedBox(
-                      width: 250,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          controller.addSubject();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Add'),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 250,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          controller.nameController.clear();
+      floatingActionButton:
+          Obx(() => controller.classesController.classes.isEmpty
+              ? const SizedBox.shrink()
+              : FloatingActionButton(
+                  child: const Icon(Icons.add),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return SizedBox(
+                          width: Get.width * 0.4,
+                          child: AlertDialog(
+                            title: const Text('Add a Subject'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  controller: controller.nameController,
+                                  decoration:
+                                      const InputDecoration(labelText: 'Name'),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              SizedBox(
+                                width: Get.width < 600 ? double.maxFinite : 250,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    controller.addSubject();
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Add'),
+                                ),
+                              ),
+                              if (Get.width > 600)
+                                SizedBox(
+                                  width:
+                                      Get.width < 600 ? double.maxFinite : 250,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      controller.nameController.clear();
 
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )),
     );
   }
 }

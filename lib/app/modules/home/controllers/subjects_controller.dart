@@ -35,8 +35,9 @@ class SubjectsController extends GetxController {
     }
   }
 
-  List<SubjectModel>? get getCurrentSubjects =>
-      classesSubjects[currentClass.value!.id];
+  List<SubjectModel>? get getCurrentSubjects => currentClass.value == null
+      ? null
+      : classesSubjects[currentClass.value!.id];
 
   Future<void> fetchSubjectsList() async {
     isLoading.value = true;
@@ -44,12 +45,14 @@ class SubjectsController extends GetxController {
     for (ClassModel cls in classesController.classes) {
       classesSubjects[cls.id] = await SubjectModel.fetchSubjectsList(cls.ref);
 
+      if (classesSubjects[cls.id] == null) continue;
+
       classesSubjects[cls.id]!.sort((a, b) => a.name.compareTo(b.name));
 
       newSubjects.addAll(classesSubjects[cls.id]!);
     }
 
-    if (classesController.classes.isEmpty) {
+    if (classesController.classes.isNotEmpty) {
       currentClass.value = classesController.classes.firstOrNull;
     }
 
@@ -141,7 +144,7 @@ class SubjectsController extends GetxController {
         ),
         actions: [
           SizedBox(
-            width: 250,
+            width: Get.width < 600 ? double.maxFinite : 250,
             child: ElevatedButton(
               onPressed: () {
                 Get.back(result: true);
@@ -149,15 +152,16 @@ class SubjectsController extends GetxController {
               child: const Text('Save'),
             ),
           ),
-          SizedBox(
-            width: 250,
-            child: ElevatedButton(
-              onPressed: () {
-                Get.back(result: false);
-              },
-              child: const Text('Cancel'),
+          if (Get.width > 600)
+            SizedBox(
+              width: Get.width < 600 ? double.maxFinite : 250,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back(result: false);
+                },
+                child: const Text('Cancel'),
+              ),
             ),
-          ),
         ],
       ),
     ));

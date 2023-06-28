@@ -69,7 +69,7 @@ class ChildrenProfileController extends GetxController {
         ),
         actions: [
           SizedBox(
-            width: 250,
+            width: Get.width < 600 ? double.maxFinite : 250,
             child: ElevatedButton(
               onPressed: () {
                 Get.back(result: true);
@@ -77,15 +77,16 @@ class ChildrenProfileController extends GetxController {
               child: const Text('Register'),
             ),
           ),
-          SizedBox(
-            width: 250,
-            child: ElevatedButton(
-              onPressed: () {
-                Get.back(result: false);
-              },
-              child: const Text('Cancel'),
+          if (Get.width > 600)
+            SizedBox(
+              width: Get.width < 600 ? double.maxFinite : 250,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back(result: false);
+                },
+                child: const Text('Cancel'),
+              ),
             ),
-          ),
         ],
       ),
     ));
@@ -117,7 +118,7 @@ class ChildrenProfileController extends GetxController {
 
           await student.update();
 
-          await fetchChildrenList();
+          await fetchChildrenList(true);
 
           Fluttertoast.showToast(msg: "Child registered successfully");
         },

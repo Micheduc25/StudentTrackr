@@ -34,9 +34,10 @@ class ChildrenMarksController extends GetxController {
     fetchCurrentChildMarks();
   }
 
-  Future<void> fetchCurrentChildMarks([int? sequence]) async {
+  Future<List<MarksModel>?> fetchCurrentChildMarks([int? sequence]) async {
     if (currentChild.value == null) {
       isLoading.value = false;
+      return null;
     }
 
     // if (childrenMarksMap[currentChild.value!.id] == null &&
@@ -58,13 +59,43 @@ class ChildrenMarksController extends GetxController {
 
       childrenMarksMap[currentChild.value!.id] =
           await Future.wait<MarksModel>(marksList);
+
+      Fluttertoast.showToast(msg: "Latest Marks retrieved");
+
+      isLoading.value = false;
+
+      return childrenMarksMap[currentChild.value!.id];
     } on Exception catch (e) {
+      isLoading.value = false;
+
       Fluttertoast.showToast(msg: "An error occurred while loadin the marks");
     }
+    return null;
+  }
 
-    Fluttertoast.showToast(msg: "Latest Marks retrieved");
+  Future<Map<String, List<MarksModel>>> fetchAllChildrenMarks() async {
+    final marksMap = <String, List<MarksModel>>{};
+    final marksCollection = FirebaseFirestore.instance.collection("marks");
 
-    isLoading.value = false;
+    for (final StudentModel child
+        in ChildrenProfileController.to.childrenList) {
+      List<MarksModel> currentMarks = [];
+
+      final marksQuery = marksCollection.where("student", isEqualTo: child.ref);
+
+      for (final sequence in [1, 2, 3]) {
+        final sequenceQuery = marksQuery.where("sequence", isEqualTo: sequence);
+        final marksSnapshot = await sequenceQuery.get();
+
+        final sequenceMarks = marksSnapshot.docs
+            .map<Future<MarksModel>>((doc) => MarksModel.fromJson(doc.data()))
+            .toList();
+
+        currentMarks.addAll(await Future.wait(sequenceMarks));
+      }
+      marksMap[child.id] = currentMarks;
+    }
+    return marksMap;
   }
 
   void selectChild(String childId) async {
@@ -123,5 +154,73 @@ class ChildrenMarksController extends GetxController {
         getStudentTotalMarkObtained() / getStudentTotalSubjectsMarks() * 20;
 
     return average;
+  }
+
+  Map<String, double?>? calculateOverallPerformancesPerChild() {
+    if (childrenMarksMap.isEmpty) return null;
+
+    Map<String, double?> totalsMap = {
+      for (String el in childrenMarksMap.keys) el: null
+    };
+
+    for (final String currentId in childrenMarksMap.keys) {
+      if (childrenMarksMap[currentId] == null ||
+          childrenMarksMap[currentId]!.isEmpty) continue;
+      // calculate total for each child
+      double markSum = 0;
+      double markTotal = 0;
+
+      for (MarksModel mark in childrenMarksMap[currentId]!) {
+        if (mark.value == null) continue;
+
+        markSum += mark.value!;
+        markTotal += AppSettings.to.markTotal;
+      }
+
+      if (markTotal == 0) continue;
+
+      totalsMap[currentId] = (markSum / markTotal) * 100;
+    }
+
+    return totalsMap;
+  }
+
+  Future<Map<String, double>> calculatePerformancesPerChild(
+      double MARK_TOTAL) async {
+    final allChildrenMarksMap = await fetchAllChildrenMarks();
+
+    Map<String, double> averagesMap = {};
+    for (final String currentId in allChildrenMarksMap.keys.toSet()) {
+      if (allChildrenMarksMap[currentId] == null ||
+          allChildrenMarksMap[currentId]!.isEmpty) continue;
+
+      List<MarksModel> marks = allChildrenMarksMap[currentId]!;
+
+      double markSum = marks
+          .where((mark) => mark.value != null)
+          .map((mark) => (mark.value! * mark.subject.coefficient))
+          .reduce((a, b) => a + b);
+
+      double markTotal = marks.length * MARK_TOTAL;
+      if (markTotal == 0) continue;
+      averagesMap[currentId] = (markSum / markTotal) * 100;
+    }
+    return averagesMap;
+  }
+
+  Future<double?> calculateTotalAveragePerformance() async {
+    try {
+      final averagePerStudent =
+          await calculatePerformancesPerChild(AppSettings.to.markTotal);
+
+      if (averagePerStudent.isEmpty) return null;
+
+      final averageTotal = averagePerStudent.values.reduce((a, b) => a + b);
+      final finalAverage = averageTotal / averagePerStudent.values.length;
+
+      return finalAverage;
+    } on Exception catch (e) {
+      return null;
+    }
   }
 }

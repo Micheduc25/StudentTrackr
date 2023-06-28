@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
@@ -23,9 +24,13 @@ class AppSettings extends GetxService {
   bool? playNotificationSound;
 
   double markTotal = 20;
+  Rx<ThemeMode> currentThemeMode =
+      Rx<ThemeMode>(Get.isDarkMode ? ThemeMode.dark : ThemeMode.light);
 
   AppSettings() {
     loadSettings();
+
+    Get.changeThemeMode(currentThemeMode.value);
   }
 
   get appSettings => _settingsStorage;
@@ -48,6 +53,11 @@ class AppSettings extends GetxService {
 
     playNotificationSound =
         _settingsStorage.read<bool>(Config.playNotificationSound);
+
+    currentThemeMode.value =
+        _settingsStorage.read<String>(Config.currentThemeMode) == "darkMode"
+            ? ThemeMode.dark
+            : ThemeMode.light;
   }
 
   //save one or multiple settings
@@ -56,5 +66,19 @@ class AppSettings extends GetxService {
       await _settingsStorage.write(key, newSettings[key]);
       loadSettings();
     }
+  }
+
+  void switchThemeMode() {
+    final newTheme = currentThemeMode.value == ThemeMode.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+    Get.changeThemeMode(newTheme);
+
+    saveSettings({
+      Config.currentThemeMode:
+          newTheme == ThemeMode.light ? "lightMode" : "darkMode"
+    });
+
+    currentThemeMode.value = newTheme;
   }
 }

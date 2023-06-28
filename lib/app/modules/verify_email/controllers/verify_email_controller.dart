@@ -18,21 +18,9 @@ class VerifyEmailController extends GetxController {
       await authController.getCurrentFirebaseUser!.reload();
 
       if (authController.getCurrentFirebaseUser!.emailVerified) {
-        if (authController.currentUser.value!.role != Config.Parent) {
-          // if user is school admin, fetch his school or list of schools
-          final schools = await SchoolModel.fetchAllUserSchools();
-
-          if (!Get.isRegistered<SchoolsController>()) {
-            Get.put<SchoolsController>(SchoolsController());
-          }
-
-          SchoolsController.to.currentSchool.value = schools[0];
-          SchoolsController.to.schoolsList = schools.obs;
-        }
+        await AuthController.to.appStartRoutine();
 
         isLoading.value = false;
-
-        Get.offAllNamed(Routes.HOME);
       } else {
         isLoading.value = false;
         Fluttertoast.showToast(msg: "Please verify your email and try again");

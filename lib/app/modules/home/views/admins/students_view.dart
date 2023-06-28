@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:student_tracker/app/models/class_model.dart';
 import 'package:student_tracker/app/models/student_model.dart';
+import 'package:student_tracker/app/modules/home/controllers/classes_controller.dart';
 
 import '../../controllers/students_controller.dart';
 
@@ -61,7 +62,7 @@ class StudentsPage extends StatelessWidget {
                 : const SizedBox.shrink()),
             const SizedBox(height: 24),
             Obx(() => studentsController.currentClass.value == null ||
-                    studentsController.getCurrentStudents == null
+                    ClassesController.to.classes.isEmpty
                 ? const SizedBox(
                     width: double.maxFinite,
                     child: Column(
@@ -69,95 +70,122 @@ class StudentsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Icon(
-                          FontAwesomeIcons.person,
+                          FontAwesomeIcons.school,
                           size: 56,
                         ),
                         SizedBox(height: 15),
-                        Text("There are no students for now")
+                        Text(
+                          "To be able to add a student, start by adding a class to your school on the classes tab",
+                          textAlign: TextAlign.center,
+                        )
                       ],
                     ),
                   )
-                : Expanded(
-                    child: GetBuilder<StudentsController>(
-                      id: "students_list",
-                      builder: (controller) {
-                        return ListView.builder(
-                          shrinkWrap: true,
-                          physics: const ClampingScrollPhysics(),
-                          itemCount:
-                              studentsController.getCurrentStudents!.length,
-                          itemBuilder: (context, studentIndex) {
-                            final student = studentsController
-                                .getCurrentStudents![studentIndex];
-                            return StudentCard(
-                              student: student,
-                              onRemove: (s) =>
-                                  studentsController.deleteStudent(student),
-                              onEdit: (s) =>
-                                  studentsController.editStudent(student),
+                : studentsController.getCurrentStudents == null
+                    ? const SizedBox(
+                        width: double.maxFinite,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              FontAwesomeIcons.person,
+                              size: 56,
+                            ),
+                            SizedBox(height: 15),
+                            Text(
+                                "There are no students for now. click on the \"+\" button below to add a student")
+                          ],
+                        ),
+                      )
+                    : Expanded(
+                        child: GetBuilder<StudentsController>(
+                          id: "students_list",
+                          builder: (controller) {
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: const ClampingScrollPhysics(),
+                              itemCount:
+                                  studentsController.getCurrentStudents!.length,
+                              itemBuilder: (context, studentIndex) {
+                                final student = studentsController
+                                    .getCurrentStudents![studentIndex];
+                                return StudentCard(
+                                  student: student,
+                                  onRemove: (s) =>
+                                      studentsController.deleteStudent(student),
+                                  onEdit: (s) =>
+                                      studentsController.editStudent(student),
+                                );
+                              },
                             );
                           },
-                        );
-                      },
-                    ),
-                  )),
+                        ),
+                      )),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return SizedBox(
-                width: Get.width * 0.4,
-                child: AlertDialog(
-                  title: const Text('Add a Student'),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextField(
-                        controller: studentsController.fullNameController,
-                        decoration: const InputDecoration(labelText: 'Name'),
+      floatingActionButton: Obx(() => studentsController.currentClass.value ==
+                  null ||
+              studentsController.classesController.classes.isEmpty
+          ? const SizedBox.shrink()
+          : FloatingActionButton(
+              child: const Icon(Icons.add),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return SizedBox(
+                      width: Get.width * 0.4,
+                      child: AlertDialog(
+                        title: const Text('Add a Student'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              controller: studentsController.fullNameController,
+                              decoration:
+                                  const InputDecoration(labelText: 'Name'),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: studentsController.ageController,
+                              decoration:
+                                  const InputDecoration(labelText: 'Age'),
+                            ),
+                          ],
+                        ),
+                        actions: [
+                          SizedBox(
+                            width: Get.width < 600 ? double.maxFinite : 250,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                studentsController.addStudent();
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Add'),
+                            ),
+                          ),
+                          if (Get.width > 600)
+                            SizedBox(
+                              width: Get.width < 600 ? double.maxFinite : 250,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  studentsController.fullNameController.clear();
+                                  studentsController.ageController.clear();
+                                  studentsController.ageController.clear();
+                                  Navigator.pop(context);
+                                },
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                        ],
                       ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: studentsController.ageController,
-                        decoration: const InputDecoration(labelText: 'Age'),
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    SizedBox(
-                      width: 250,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          studentsController.addStudent();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Add'),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 250,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          studentsController.fullNameController.clear();
-                          studentsController.ageController.clear();
-                          studentsController.ageController.clear();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
+                    );
+                  },
+                );
+              },
+            )),
     );
   }
 }

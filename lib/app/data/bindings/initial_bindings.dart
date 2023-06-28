@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:student_tracker/app/controllers/settings_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/classes_controller.dart';
+import 'package:student_tracker/app/modules/home/controllers/home_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/marks_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/students_controller.dart';
 import 'package:student_tracker/app/modules/home/controllers/subjects_controller.dart';

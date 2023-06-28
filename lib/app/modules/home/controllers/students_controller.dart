@@ -152,7 +152,7 @@ class StudentsController extends GetxController {
         ),
         actions: [
           SizedBox(
-            width: 250,
+            width: Get.width < 600 ? double.maxFinite : 250,
             child: ElevatedButton(
               onPressed: () {
                 Get.back(result: true);
@@ -160,15 +160,16 @@ class StudentsController extends GetxController {
               child: const Text('Save'),
             ),
           ),
-          SizedBox(
-            width: 250,
-            child: ElevatedButton(
-              onPressed: () {
-                Get.back(result: false);
-              },
-              child: const Text('Cancel'),
+          if (Get.width > 600)
+            SizedBox(
+              width: Get.width < 600 ? double.maxFinite : 250,
+              child: ElevatedButton(
+                onPressed: () {
+                  Get.back(result: false);
+                },
+                child: const Text('Cancel'),
+              ),
             ),
-          ),
         ],
       ),
     ));

@@ -11,7 +11,7 @@ import 'package:student_tracker/app/utils/config.dart';
 import 'package:student_tracker/app/utils/helpers.dart';
 import 'package:uuid/uuid.dart';
 
-class ProfileController extends GetxController {
+class ProfileController extends GetxService {
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   Rx<AutovalidateMode> autovalidateMode =
